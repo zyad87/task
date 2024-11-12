@@ -1,0 +1,16 @@
+
+.footer {
+    color: darkblue;
+    text-align: center;
+    padding: 20px 0; 
+    font-size: 0.9rem;
+    bottom: 0;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.footer p {
+    margin: 0;
+}
+
+
