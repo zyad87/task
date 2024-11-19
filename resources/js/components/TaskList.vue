@@ -1,34 +1,39 @@
 <template>
-    <div class="task-list container mt-4">
-        <h2 class="task-list-title">
-            <i class="fa-solid fa-list-check"></i> Task List
-        </h2>
+    <div :class="['task-list', 'container', 'mt-4', currentLanguage === 'ar' ? 'rtl' : 'ltr']">
+        <div class="header d-flex justify-content-between align-items-center">
+            <h2 class="task-list-title">
+                <i class="fa-solid fa-list-check"></i> {{ currentLanguage === 'en' ? 'Task List' : 'قائمة المهام' }}
+            </h2>
 
-        <!-- عناصر التصفية والترتيب وزر إضافة مهمة جديدة -->
+            <!-- زر محول اللغة -->
+            <button class="language-switcher-btn" @click="toggleLanguage">
+                {{ currentLanguage === 'en' ? 'العربية' : 'English' }}
+            </button>
+        </div>
         <div class="filters mb-4 d-flex justify-content-between align-items-center">
             <!-- خيارات التصفية -->
             <div class="filter-group">
-                <label for="filterStatus" class="filter-label">Status:</label>
+                <label for="filterStatus" class="filter-label">{{ currentLanguage === 'en' ? 'Status:' : 'الحالة:' }}</label>
                 <select id="filterStatus" v-model="filterStatus" class="filter-select">
-                    <option value="">All</option>
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
+                    <option value="">{{ currentLanguage === 'en' ? 'All' : 'الكل' }}</option>
+                    <option value="Pending">{{ currentLanguage === 'en' ? 'Pending' : 'قيد الانتظار' }}</option>
+                    <option value="In Progress">{{ currentLanguage === 'en' ? 'In Progress' : 'قيد التنفيذ' }}</option>
+                    <option value="Completed">{{ currentLanguage === 'en' ? 'Completed' : 'مكتملة' }}</option>
                 </select>
             </div>
 
             <!-- خيارات الترتيب -->
             <div class="filter-group">
-                <label for="sortOrder" class="filter-label">Sort by:</label>
+                <label for="sortOrder" class="filter-label">{{ currentLanguage === 'en' ? 'Sort by:' : 'ترتيب حسب:' }}</label>
                 <select id="sortOrder" v-model="sortOrder" class="filter-select">
-                    <option value="created_asc">Oldest First</option>
-                    <option value="created_desc">Newest First</option>
+                    <option value="created_asc">{{ currentLanguage === 'en' ? 'Oldest First' : 'الأقدم أولاً' }}</option>
+                    <option value="created_desc">{{ currentLanguage === 'en' ? 'Newest First' : 'الأحدث أولاً' }}</option>
                 </select>
             </div>
 
             <!-- زر إضافة مهمة جديدة -->
             <button class="btn add-task-btn" @click="openModal">
-                <i class="fa-solid fa-plus"></i> Add Task
+                <i class="fa-solid fa-plus"></i> {{ currentLanguage === 'en' ? 'Add Task' : 'إضافة مهمة' }}
             </button>
         </div>
 
@@ -47,13 +52,13 @@
                 </div>
                 <div class="task-card-actions">
                     <button @click="editTask(task)" class="btn btn-edit">
-                        <i class="fa-regular fa-pen-to-square"></i> 
+                        <i class="fa-regular fa-pen-to-square"></i> {{ currentLanguage === 'en' ? 'Edit' : 'تعديل' }}
                     </button>
                     <button @click="confirmDelete(task.id)" class="btn btn-delete">
-                        <i class="fa-regular fa-trash-can"></i>
+                        <i class="fa-regular fa-trash-can"></i> {{ currentLanguage === 'en' ? 'Delete' : 'حذف' }}
                     </button>
                     <button @click="viewDetails(task)" class="btn btn-details">
-                        <i class="fa-regular fa-eye"></i> 
+                        <i class="fa-regular fa-eye"></i> {{ currentLanguage === 'en' ? 'View' : 'عرض' }}
                     </button>
                 </div>
             </div>
@@ -102,6 +107,7 @@ export default {
             filterStatus: '',
             sortOrder: 'created_desc',
             isEditing: false,
+            currentLanguage: localStorage.getItem('language') || 'en', // اللغة الحالية يتم جلبها من التخزين المحلي
         };
     },
     computed: {
@@ -125,8 +131,16 @@ export default {
         this.$store.dispatch('loadTasks').then(() => {
             console.log('Loaded tasks');
         });
+
+        // تحديث اتجاه الصفحة بناءً على اللغة الحالية
+        document.documentElement.setAttribute('dir', this.currentLanguage === 'ar' ? 'rtl' : 'ltr');
     },
     methods: {
+        toggleLanguage() {
+            this.currentLanguage = this.currentLanguage === 'en' ? 'ar' : 'en';
+            localStorage.setItem('language', this.currentLanguage); // تخزين اللغة في التخزين المحلي
+            document.documentElement.setAttribute('dir', this.currentLanguage === 'ar' ? 'rtl' : 'ltr');
+        },
         statusClass(status) {
             switch (status) {
                 case 'Pending': return 'icon-pending';
@@ -154,16 +168,28 @@ export default {
             this.selectedTask = null;
         },
         handleTaskAdded() {
-            this.showModal = false;
-            document.body.style.overflow = 'auto';
-            Swal.fire({
-                icon: 'success',
-                title: 'Task Added',
-                text: 'Your task has been successfully added!',
-                showConfirmButton: false,
-                timer: 1500,
-            });
-        },
+    this.showModal = false;
+    document.body.style.overflow = 'auto';
+
+    if (this.isEditing) {
+        Swal.fire({
+            icon: 'success',
+            title: this.currentLanguage === 'en' ? 'Task Updated' : 'تم تحديث المهمة',
+            text: this.currentLanguage === 'en' ? 'Your task has been successfully updated!' : 'تم تحديث المهمة بنجاح!',
+            showConfirmButton: false,
+            timer: 1500,
+        });
+    } else {
+        Swal.fire({
+            icon: 'success',
+            title: this.currentLanguage === 'en' ? 'Task Added' : 'تم إضافة المهمة',
+            text: this.currentLanguage === 'en' ? 'Your task has been successfully added!' : 'تمت إضافة المهمة بنجاح!',
+            showConfirmButton: false,
+            timer: 1500,
+        });
+    }
+},
+
         viewDetails(task) {
             this.selectedTask = task;
             this.showDetailsModal = true;
@@ -176,17 +202,22 @@ export default {
         },
         confirmDelete(taskId) {
             Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
+                title: this.currentLanguage === 'en' ? 'Are you sure?' : 'هل أنت متأكد؟',
+                text: this.currentLanguage === 'en' ? "You won't be able to revert this!" : 'لن تتمكن من التراجع عن هذا!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: this.currentLanguage === 'en' ? 'Yes, delete it!' : 'نعم، احذفه!',
+                cancelButtonText: this.currentLanguage === 'en' ? 'Cancel' : 'إلغاء'
             }).then((result) => {
                 if (result.isConfirmed) {
                     this.$store.dispatch('deleteTask', taskId).then(() => {
-                        Swal.fire('Deleted!', 'The task has been deleted.', 'success');
+                        Swal.fire(
+                            this.currentLanguage === 'en' ? 'Deleted!' : 'تم الحذف!',
+                            this.currentLanguage === 'en' ? 'The task has been deleted.' : 'تم حذف المهمة.',
+                            'success'
+                        );
                     });
                 }
             });
@@ -195,19 +226,25 @@ export default {
             this.selectedTask = task;
             this.isEditing = true;
             this.openModal();
-        }
+        },
     },
 };
 </script>
 
 <style scoped>
-.task-list {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f3f4f6;
-    border-radius: 15px;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+body, .rtl {
+    font-family: "Tajawal", sans-serif !important;
+    direction: rtl;
+    text-align: right;
+}
+.language-switcher-btn{
+    font-family: "Tajawal", sans-serif !important;
+}
+
+body.ltr {
+    font-family: Arial, sans-serif !important;
+    direction: ltr;
+    text-align: left;
 }
 
 /* العنوان */
@@ -351,7 +388,7 @@ export default {
 
 .task-card-actions .btn {
     font-size: 0.85rem;
-    margin: 0 5px;
+    margin: 0 3px;
     padding: 8px 12px;
     border-radius: 5px;
 }
@@ -431,6 +468,26 @@ export default {
     cursor: pointer;
     box-shadow: none;
 }
+.language-switcher {
+    display: flex;
+    gap: 10px;
+}
+
+.language-switcher-btn {
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: #3498db;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.language-switcher-btn:hover {
+    background-color: #2874a6;
+}
+
 
 /* استعلامات الوسائط للشاشات الصغيرة */
 @media (max-width: 768px) {
@@ -473,5 +530,5 @@ export default {
         padding: 8px;
     }
 }
+/* باقي التنسيقات تبقى كما هي */
 </style>
-

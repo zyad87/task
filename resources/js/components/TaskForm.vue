@@ -2,55 +2,58 @@
   <div class="modal-container">
       <div class="modal-content">
           <div class="modal-header">
-              <h2 class="text-center">{{ task ? 'Edit Task' : 'Add New Task' }}</h2>
+              <h2 class="text-center">
+                {{ currentLanguage === 'en' ? (task ? 'Edit Task' : 'Add New Task') : (task ? 'تعديل المهمة' : 'إضافة مهمة جديدة') }}
+              </h2>
               <button @click="closeModal" class="close-button">&times;</button>
           </div>
           <form ref="taskForm" @submit.prevent="submitTask" class="p-4 rounded bg-white needs-validation" novalidate>
-    <div class="mb-3">
-        <label for="taskName" class="form-label">Task Name</label>
-        <input
-            v-model="taskName"
-            id="taskName"
-            type="text"
-            class="form-control"
-            placeholder="Enter task name"
-            required
-        />
-        <div class="invalid-feedback">
-            Please enter a task name.
-        </div>
-    </div>
+              <div class="mb-3">
+                  <label for="taskName" class="form-label">{{ currentLanguage === 'en' ? 'Task Name' : 'اسم المهمة' }}</label>
+                  <input
+                      v-model="taskName"
+                      id="taskName"
+                      type="text"
+                      class="form-control"
+                      :placeholder="currentLanguage === 'en' ? 'Enter task name' : 'أدخل اسم المهمة'"
+                      required
+                  />
+                  <div class="invalid-feedback">
+                      {{ currentLanguage === 'en' ? 'Please enter a task name.' : 'يرجى إدخال اسم المهمة.' }}
+                  </div>
+              </div>
 
-    <div class="mb-3">
-        <label for="taskDescription" class="form-label">Task Description (optional)</label>
-        <textarea
-            v-model="taskDescription"
-            id="taskDescription"
-            class="form-control"
-            placeholder="Enter task description"
-            rows="2"
-            maxlength="100"
-        ></textarea>
-    </div>
+              <div class="mb-3">
+                  <label for="taskDescription" class="form-label">{{ currentLanguage === 'en' ? 'Task Description (optional)' : 'وصف المهمة (اختياري)' }}</label>
+                  <textarea
+                      v-model="taskDescription"
+                      id="taskDescription"
+                      class="form-control"
+                      :placeholder="currentLanguage === 'en' ? 'Enter task description' : 'أدخل وصف المهمة'"
+                      rows="2"
+                      maxlength="100"
+                  ></textarea>
+              </div>
 
-    <div class="task-status-container mb-3">
-        <label for="taskStatus" class="form-label">Task Status</label>
-        <select v-model="taskStatus" id="taskStatus" class="form-select" required>
-            <option value="" disabled>Select status</option>
-            <option value="Pending">⏳ Pending</option>
-            <option value="In Progress">🔄 In Progress</option>
-            <option value="Completed">✅ Completed</option>
-        </select>
-        <div class="invalid-feedback">
-            Please select a task status.
-        </div>
-    </div>
+              <div class="task-status-container mb-3">
+                  <label for="taskStatus" class="form-label">{{ currentLanguage === 'en' ? 'Task Status' : 'حالة المهمة' }}</label>
+                  <select v-model="taskStatus" id="taskStatus" class="form-select" required>
+                      <option value="" disabled>{{ currentLanguage === 'en' ? 'Select status' : 'اختر الحالة' }}</option>
+                      <option value="Pending">{{ currentLanguage === 'en' ? '⏳ Pending' : '⏳ قيد الانتظار' }}</option>
+                      <option value="In Progress">{{ currentLanguage === 'en' ? '🔄 In Progress' : '🔄 قيد التنفيذ' }}</option>
+                      <option value="Completed">{{ currentLanguage === 'en' ? '✅ Completed' : '✅ مكتملة' }}</option>
+                  </select>
+                  <div class="invalid-feedback">
+                      {{ currentLanguage === 'en' ? 'Please select a task status.' : 'يرجى اختيار حالة المهمة.' }}
+                  </div>
+              </div>
 
-    <div class="d-grid">
-        <button type="submit" class="btn btn-primary">{{ task ? 'Update Task' : 'Add Task' }}</button>
-    </div>
-</form>
-
+              <div class="d-grid">
+                  <button type="submit" class="btn btn-primary">
+                    {{ currentLanguage === 'en' ? (task ? 'Update Task' : 'Add Task') : (task ? 'تحديث المهمة' : 'إضافة المهمة') }}
+                  </button>
+              </div>
+          </form>
       </div>
   </div>
 </template>
@@ -67,11 +70,12 @@ export default {
   },
   data() {
       return {
-        submitted: false, 
+          submitted: false, 
           taskName: this.task ? this.task.name : '',
           taskDescription: this.task ? this.task.description : '',
           taskStatus: this.task ? this.task.status : 'Pending',
-          maxDescriptionLength: 100 
+          maxDescriptionLength: 100,
+          currentLanguage: localStorage.getItem('language') || 'en' // جلب اللغة من التخزين المحلي أو افتراضيًا الإنجليزية
       };
   },
   methods: {
@@ -110,11 +114,9 @@ export default {
     closeModal() {
         this.$emit('close');
     },
-},
-
+  }
 };
 </script>
-
 
 <style scoped>
 .modal-container {
@@ -252,4 +254,3 @@ select {
   }
 }
 </style>
-

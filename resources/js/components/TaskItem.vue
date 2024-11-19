@@ -3,24 +3,49 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"> Task Details</h5>
+                    <h5 class="modal-title">
+                        {{ currentLanguage === 'en' ? 'Task Details' : 'تفاصيل المهمة' }}
+                    </h5>
                     <button type="button" class="btn-close" @click="$emit('close')"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="modal-body task-details">
-                    <p><strong><i class="fa-regular fa-file-lines"></i> Name:</strong> {{ task.name }}</p>
-                    <p><strong><i class="fa-solid fa-bars-staggered"></i> Description:</strong> {{ task.description }}</p>
-                    <p><strong><i class="fa-solid fa-tag"></i> Status:</strong> <span :class="statusClass(task.status)">{{ task.status }}</span></p>
-                    <p><strong><i class="fa-regular fa-clock"></i> Created:</strong> {{ formatTimeAgo(task.created_at) }}</p>
-                    <p><strong><i class="fa-solid fa-clock-rotate-left"></i> Updated:</strong> {{ formatTimeAgo(task.updated_at) }}</p>
+                    <p>
+                        <strong><i class="fa-regular fa-file-lines"></i>
+                        {{ currentLanguage === 'en' ? 'Name:' : 'الاسم:' }}
+                        </strong> {{ task.name }}
+                    </p>
+                    <p>
+                        <strong><i class="fa-solid fa-bars-staggered"></i>
+                        {{ currentLanguage === 'en' ? 'Description:' : 'الوصف:' }}
+                        </strong> {{ task.description }}
+                    </p>
+                    <p>
+                        <strong><i class="fa-solid fa-tag"></i>
+                        {{ currentLanguage === 'en' ? 'Status:' : 'الحالة:' }}
+                        </strong> 
+                        <span :class="statusClass(task.status)">
+                            {{ currentLanguage === 'en' ? task.status : translateStatus(task.status) }}
+                        </span>
+                    </p>
+                    <p>
+                        <strong><i class="fa-regular fa-clock"></i>
+                        {{ currentLanguage === 'en' ? 'Created:' : 'تاريخ الإنشاء:' }}
+                        </strong> {{ formatTimeAgo(task.created_at) }}
+                    </p>
+                    <p>
+                        <strong><i class="fa-solid fa-clock-rotate-left"></i>
+                        {{ currentLanguage === 'en' ? 'Updated:' : 'آخر تحديث:' }}
+                        </strong> {{ formatTimeAgo(task.updated_at) }}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </template>
 
-
 <script>
 import { formatDistanceToNow } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
 export default {
     props: {
@@ -29,9 +54,18 @@ export default {
             required: true
         }
     },
+    data() {
+        return {
+            currentLanguage: localStorage.getItem('language') || 'en' // جلب اللغة من التخزين المحلي أو افتراضيًا الإنجليزية
+        };
+    },
     methods: {
         formatTimeAgo(date) {
-            return formatDistanceToNow(new Date(date), { addSuffix: true });
+            const locale = this.currentLanguage === 'ar' ? ar : enUS;
+            return formatDistanceToNow(new Date(date), {
+                addSuffix: true,
+                locale: locale,
+            });
         },
         statusClass(status) {
             switch (status) {
@@ -44,11 +78,22 @@ export default {
                 default:
                     return 'badge-default';
             }
+        },
+        translateStatus(status) {
+            switch (status) {
+                case 'Pending':
+                    return 'قيد الانتظار';
+                case 'In Progress':
+                    return 'قيد التنفيذ';
+                case 'Completed':
+                    return 'مكتملة';
+                default:
+                    return status;
+            }
         }
     }
 };
 </script>
-
 
 <style scoped>
 .modal-overlay {
@@ -97,7 +142,6 @@ export default {
     border: none;
     box-shadow: none;
     color: #f40303;
-
 }
 
 .task-details p {
@@ -164,6 +208,4 @@ export default {
         font-size: 1.2rem;
     }
 }
-
 </style>
-
